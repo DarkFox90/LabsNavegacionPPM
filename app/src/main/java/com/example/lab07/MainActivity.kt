@@ -137,7 +137,7 @@ fun ScreenLoginDestination(onNavigateToHome: () -> Unit) {
                 ),
             ) {
                 Text(
-                    text = "Entrar",
+                    text = "Empezar",
                     style = MaterialTheme.typography.titleMedium
                 )
             }
