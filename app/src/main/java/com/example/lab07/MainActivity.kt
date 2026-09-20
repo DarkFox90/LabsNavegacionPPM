@@ -40,6 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import com.example.lab07.ui.theme.Lab07Theme
 import kotlinx.serialization.Serializable
+import androidx.compose.foundation.clickable
 
 @Serializable data object LoginDestination
 @Serializable data object HomeDestination
@@ -76,7 +77,11 @@ fun AppNavigation() {
             )
         }
         composable<HomeDestination> {
-            ScreenHomeDestination()
+            ScreenHomeDestination(
+                onNavigateToDetails = { id ->
+                    navController.navigate(route = DetailsDestination(characterId = id))
+                }
+            )
         }
     }
 }
@@ -133,10 +138,11 @@ fun ScreenLoginDestination(onNavigateToHome: () -> Unit) {
 }
 
 @Composable
-fun CharacterItem(character: Character) {
+fun CharacterItem(character: Character, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -180,7 +186,7 @@ fun CharacterItem(character: Character) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScreenHomeDestination(){
+fun ScreenHomeDestination(onNavigateToDetails: (Int) -> Unit){
     val characters = CharacterDb().getAllCharacters()
 
     Scaffold(
@@ -207,7 +213,10 @@ fun ScreenHomeDestination(){
                 .padding(innerPadding)
         ) {
             items(characters) { character ->
-                CharacterItem(character = character)
+                CharacterItem(
+                    character = character,
+                    onClick = { onNavigateToDetails(character.id) }
+                )
             }
         }
     }
