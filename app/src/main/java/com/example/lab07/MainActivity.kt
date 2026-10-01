@@ -1,58 +1,39 @@
 package com.example.lab07
 
-import androidx.compose.foundation.lazy.items
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
 import com.example.lab07.ui.theme.Lab07Theme
-import kotlinx.serialization.Serializable
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.ui.Alignment
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.runtime.getValue
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.example.lab07.characters.ScreenDetailsDestination
 import com.example.lab07.characters.ScreenHomeDestination
+import com.example.lab07.locations.LocationDetailsScreen
+import com.example.lab07.locations.LocationsScreen
 import com.example.lab07.login.ScreenLoginDestination
-import com.example.lab07.navigation.DetailsDestination
-import com.example.lab07.navigation.HomeDestination
+import com.example.lab07.navigation.AppBottomBar
+import com.example.lab07.navigation.CharacterDetailsDestination
+import com.example.lab07.navigation.CharactersGraph
+import com.example.lab07.navigation.CharactersListDestination
+import com.example.lab07.navigation.LocationDetailsDestination
+import com.example.lab07.navigation.LocationsGraph
+import com.example.lab07.navigation.LocationsListDestination
 import com.example.lab07.navigation.LoginDestination
+import com.example.lab07.profile.ProfileScreen
+import com.example.lab07.navigation.ProfileDestination
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 
 
 class MainActivity : ComponentActivity() {
@@ -71,39 +52,92 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination?.route
+    val showBottomBar = currentDestination?.contains(LoginDestination::class.simpleName?: "") == false
 
-    NavHost(
-        navController = navController,
-        startDestination = LoginDestination
-    ) {
-        composable<LoginDestination> {
-            ScreenLoginDestination(
-                onNavigateToHome = {
-                    navController.navigate(route = HomeDestination) {
-                        popUpTo<LoginDestination> { inclusive = true }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            if (showBottomBar) {
+                AppBottomBar(
+                    currentRoute = currentDestination,
+                    onNavigate = { route ->
+                        navController.navigate(route) {
+                            popUpTo(CharactersGraph) { saveState = true}
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
-                }
-            )
+                )
+            }
         }
-        composable<HomeDestination> {
-            ScreenHomeDestination(
-                onNavigateToDetails = { id ->
-                    navController.navigate(route = DetailsDestination(characterId = id))
-                }
-            )
-        }
-        composable<DetailsDestination> {backStackEntry ->
-            val destination = backStackEntry.toRoute<DetailsDestination>()
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = LoginDestination,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+        ) {
+            composable<LoginDestination> {
+                ScreenLoginDestination(
+                    onNavigateToHome = {
+                        navController.navigate(CharactersGraph) {
+                            popUpTo<LoginDestination> { inclusive = true }
+                        }
+                    }
+                )
+            }
 
-            ScreenDetailsDestination(
-                characterId = destination.characterId,
-                onNavigateBack = {
-                    navController.popBackStack()
+            navigation<CharactersGraph>(startDestination = CharactersListDestination) {
+                composable<CharactersListDestination> {
+                    ScreenHomeDestination(
+                        onNavigateToDetails = { id ->
+                            navController.navigate(CharacterDetailsDestination(id))
+                        }
+                    )
                 }
-            )
+                composable<CharacterDetailsDestination> { backStackEntry ->
+                    val destination = backStackEntry.toRoute<CharacterDetailsDestination>()
+                    ScreenDetailsDestination(
+                        characterId = destination.characterId,
+                        onNavigateBack = {navController.popBackStack()}
+                    )
+                }
+            }
+
+            navigation<LocationsGraph>(startDestination = LocationsListDestination) {
+                composable<LocationsListDestination> {
+                    LocationsScreen(
+                        onNavigateToDetails = { id ->
+                            navController.navigate(LocationDetailsDestination(id))
+                        }
+                    )
+                }
+                composable<LocationDetailsDestination> { backStackEntry ->
+                    val destination = backStackEntry.toRoute<LocationDetailsDestination>()
+                    LocationDetailsScreen(
+                        locationId = destination.locationId,
+                        onNavigateBack = { navController.popBackStack() }
+                    )
+                }
+            }
+
+            composable< ProfileDestination > {
+                ProfileScreen(
+                    onLogout = {
+                        navController.navigate(LoginDestination) {
+                            popUpTo(0)
+                        }
+                    }
+                )
+            }
         }
     }
 }
+
 
 
 @Preview(showBackground = true)
