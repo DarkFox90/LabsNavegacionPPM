@@ -53,8 +53,8 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination?.route
-    val showBottomBar = currentDestination?.contains(LoginDestination::class.simpleName?: "") == false
+    val currentDestination = navBackStackEntry?.destination
+    val showBottomBar = currentDestination?.route?.contains("Login", ignoreCase = true) == false
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
