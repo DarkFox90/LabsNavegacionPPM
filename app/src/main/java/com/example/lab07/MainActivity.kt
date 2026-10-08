@@ -16,9 +16,6 @@ import com.example.lab07.ui.theme.Lab07Theme
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navigation
-import androidx.navigation.toRoute
-import com.example.lab07.locations.LocationDetailsScreen
-import com.example.lab07.locations.LocationsScreen
 import com.example.lab07.login.ScreenLoginDestination
 import com.example.lab07.navigation.AppBottomBar
 import com.example.lab07.navigation.CharacterDetailsDestination
@@ -35,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import com.example.lab07.characters.CharacterDetailsRoute
 import com.example.lab07.characters.CharacterDetailsScreen
 import com.example.lab07.characters.CharactersRoute
+import com.example.lab07.locations.LocationDetailsRoute
 import com.example.lab07.locations.LocationsRoute
 
 
@@ -116,10 +114,8 @@ fun AppNavigation() {
                         }
                     )
                 }
-                composable<LocationDetailsDestination> { backStackEntry ->
-                    val destination = backStackEntry.toRoute<LocationDetailsDestination>()
-                    LocationDetailsScreen(
-                        locationId = destination.locationId,
+                composable<LocationDetailsDestination> {
+                    LocationDetailsRoute(
                         onNavigateBack = { navController.popBackStack() }
                     )
                 }

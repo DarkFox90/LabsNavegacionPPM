@@ -1,6 +1,5 @@
 package com.example.lab07.locations
 
-import android.graphics.Paint
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.lab07.Location
-import com.example.lab07.LocationDb
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
@@ -93,7 +91,7 @@ fun LocationsScreen(
             ) {
                 CircularProgressIndicator()
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Cargando Ubicaciones")
+                Text("Cargando")
             }
         }
     } else if (state.hasError) {
