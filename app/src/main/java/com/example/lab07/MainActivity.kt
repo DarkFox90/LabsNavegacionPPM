@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import com.example.lab07.characters.CharacterDetailsRoute
 import com.example.lab07.characters.CharacterDetailsScreen
 import com.example.lab07.characters.CharactersRoute
+import com.example.lab07.locations.LocationsRoute
 
 
 class MainActivity : ComponentActivity() {
@@ -109,7 +110,7 @@ fun AppNavigation() {
 
             navigation<LocationsGraph>(startDestination = LocationsListDestination) {
                 composable<LocationsListDestination> {
-                    LocationsScreen(
+                    LocationsRoute(
                         onNavigateToDetails = { id ->
                             navController.navigate(LocationDetailsDestination(id))
                         }

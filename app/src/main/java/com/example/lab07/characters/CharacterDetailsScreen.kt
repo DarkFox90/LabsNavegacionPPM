@@ -90,13 +90,13 @@ fun CharacterDetailsScreen(
                 Icon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = "Error",
-                    tint = Color.Red,
+                    tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(48.dp)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Error al obtener el perfil. \nIntenta de nuevo",
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.height(16.dp))
