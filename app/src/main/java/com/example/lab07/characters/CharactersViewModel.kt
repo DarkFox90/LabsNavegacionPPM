@@ -3,6 +3,8 @@ package com.example.lab07.characters
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.lab07.CharacterDb
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,9 +16,7 @@ class CharactersViewModel : ViewModel() {
     private val _state = MutableStateFlow(CharactersState())
     val state: StateFlow<CharactersState> = _state.asStateFlow()
 
-    init {
-        cargarDatos()
-    }
+    private var job: Job? = null
 
     fun onEvent(event: CharactersEvent) {
         when (event) {
@@ -26,9 +26,11 @@ class CharactersViewModel : ViewModel() {
     }
 
     private fun cargarDatos() {
+        job?.cancel()
+
         _state.update { it.copy(isLoading = true, hasError = false) }
 
-        viewModelScope.launch {
+        job = viewModelScope.launch {
             delay(4000)
             val db = CharacterDb()
             val personajes = db.getAllCharacters()
@@ -37,6 +39,7 @@ class CharactersViewModel : ViewModel() {
     }
 
     private fun forzarError() {
+        job?.cancel()
         _state.update { it.copy(isLoading = false, hasError = true) }
     }
 }

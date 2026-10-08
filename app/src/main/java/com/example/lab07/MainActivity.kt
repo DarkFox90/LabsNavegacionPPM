@@ -18,7 +18,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.example.lab07.characters.ScreenDetailsDestination
-import com.example.lab07.characters.ScreenHomeDestination
 import com.example.lab07.locations.LocationDetailsScreen
 import com.example.lab07.locations.LocationsScreen
 import com.example.lab07.login.ScreenLoginDestination
@@ -34,6 +33,7 @@ import com.example.lab07.profile.ProfileScreen
 import com.example.lab07.navigation.ProfileDestination
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import com.example.lab07.characters.CharactersRoute
 
 
 class MainActivity : ComponentActivity() {
@@ -93,7 +93,7 @@ fun AppNavigation() {
 
             navigation<CharactersGraph>(startDestination = CharactersListDestination) {
                 composable<CharactersListDestination> {
-                    ScreenHomeDestination(
+                    CharactersRoute(
                         onNavigateToDetails = { id ->
                             navController.navigate(CharacterDetailsDestination(id))
                         }
