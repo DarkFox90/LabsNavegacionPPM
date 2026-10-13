@@ -10,18 +10,44 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lab07.R
 
+
 @Composable
-fun ScreenLoginDestination(onNavigateToHome: () -> Unit) {
+fun LoginRoute(
+    onNavigateToHome: () -> Unit,
+    viewModel: LoginViewModel = viewModel()
+) {
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(state.isLoginSuccessful) {
+        if (state.isLoginSuccessful) {
+            onNavigateToHome()
+        }
+    }
+
+    LoginScreen(
+        state = state, onEvent = viewModel::onEvent
+    )
+}
+@Composable
+fun LoginScreen(
+    state: LoginState,
+    onEvent: (LoginEvent) -> Unit
+) {
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
@@ -42,8 +68,18 @@ fun ScreenLoginDestination(onNavigateToHome: () -> Unit) {
                     .padding(horizontal = 32.dp)
             )
 
+            OutlinedTextField(
+                value = state.nameInput,
+                onValueChange = { onEvent(LoginEvent.OnNameChanged(it)) },
+                label = { Text("Nombre") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+                    .padding(bottom = 16.dp)
+            )
+
             Button(
-                onClick = onNavigateToHome,
+                onClick = { onEvent(LoginEvent.OnLoginClick) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp)

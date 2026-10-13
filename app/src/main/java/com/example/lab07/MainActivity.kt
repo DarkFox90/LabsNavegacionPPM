@@ -16,7 +16,6 @@ import com.example.lab07.ui.theme.Lab07Theme
 import androidx.compose.runtime.getValue
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navigation
-import com.example.lab07.login.ScreenLoginDestination
 import com.example.lab07.navigation.AppBottomBar
 import com.example.lab07.navigation.CharacterDetailsDestination
 import com.example.lab07.navigation.CharactersGraph
@@ -34,6 +33,7 @@ import com.example.lab07.characters.CharacterDetailsScreen
 import com.example.lab07.characters.CharactersRoute
 import com.example.lab07.locations.LocationDetailsRoute
 import com.example.lab07.locations.LocationsRoute
+import com.example.lab07.login.LoginRoute
 
 
 class MainActivity : ComponentActivity() {
@@ -82,7 +82,7 @@ fun AppNavigation() {
                 .consumeWindowInsets(innerPadding)
         ) {
             composable<LoginDestination> {
-                ScreenLoginDestination(
+                LoginRoute(
                     onNavigateToHome = {
                         navController.navigate(CharactersGraph) {
                             popUpTo<LoginDestination> { inclusive = true }
