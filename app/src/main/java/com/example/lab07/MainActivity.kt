@@ -34,6 +34,7 @@ import com.example.lab07.characters.CharactersRoute
 import com.example.lab07.locations.LocationDetailsRoute
 import com.example.lab07.locations.LocationsRoute
 import com.example.lab07.login.LoginRoute
+import com.example.lab07.profile.ProfileRoute
 
 
 class MainActivity : ComponentActivity() {
@@ -122,10 +123,10 @@ fun AppNavigation() {
             }
 
             composable< ProfileDestination > {
-                ProfileScreen(
-                    onLogout = {
+                ProfileRoute(
+                    onNavigateToLogin = {
                         navController.navigate(LoginDestination) {
-                            popUpTo(0)
+                            popUpTo(0) { inclusive = true }
                         }
                     }
                 )

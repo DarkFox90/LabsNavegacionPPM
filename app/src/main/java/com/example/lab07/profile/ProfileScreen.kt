@@ -19,14 +19,37 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
+fun ProfileRoute(
+    onNavigateToLogin: () -> Unit,
+    viewModel: ProfileViewModel = viewModel()
+) {
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(state.isLoggedOut) {
+        if (state.isLoggedOut) {
+            onNavigateToLogin()
+        }
+    }
+
+    ProfileScreen(
+        state = state,
+        onEvent = viewModel::onEvent
+    )
+}
+@Composable
 fun ProfileScreen (
-    onLogout: () -> Unit
+    state: ProfileState,
+    onEvent: (ProfileEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -62,7 +85,7 @@ fun ProfileScreen (
                 text = "Nombre: ",
             )
             Text(
-                text = "Carlos Pozuelos Mendizábal"
+                text = state.userName.ifBlank { "Usuario" }
             )
         }
 
@@ -82,7 +105,7 @@ fun ProfileScreen (
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        OutlinedButton(onClick = onLogout) {
+        OutlinedButton(onClick = { onEvent(ProfileEvent.OnLogoutClick) }) {
             Text(
                 text = "Cerrar sesión"
             )
