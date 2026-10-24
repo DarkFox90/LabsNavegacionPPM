@@ -1,4 +1,4 @@
-package com.example.lab07
+package com.example.lab07.data
 
 import android.content.Context
 import kotlinx.coroutines.flow.Flow

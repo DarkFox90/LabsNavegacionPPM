@@ -2,7 +2,7 @@ package com.example.lab07.locations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.lab07.LocationDb
+import com.example.lab07.data.LocationDb
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

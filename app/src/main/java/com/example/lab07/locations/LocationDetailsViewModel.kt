@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.example.lab07.LocationDb
+import com.example.lab07.data.LocationDb
 import com.example.lab07.navigation.LocationDetailsDestination
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay

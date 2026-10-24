@@ -1,5 +1,6 @@
-package com.example.lab07
+package com.example.lab07.data
 
+import com.example.lab07.Location
 
 class LocationDb {
     private val locations: List<Location> = listOf(
