@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -80,6 +82,7 @@ fun LoginScreen(
 
             Button(
                 onClick = { onEvent(LoginEvent.OnLoginClick) },
+                enabled = !state.isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp)
@@ -89,11 +92,20 @@ fun LoginScreen(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
             ) {
-                Text(
-                    text = "Empezar",
-                    style = MaterialTheme.typography.titleMedium
-                )
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        text = "Empezar",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
+
 
             Spacer(modifier = Modifier.weight(1f))
 
