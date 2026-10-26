@@ -3,6 +3,7 @@ package com.example.lab07.profile
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.lab07.data.DatabaseProvider
 import com.example.lab07.data.UserStore
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,6 +15,9 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
     private val userStore = UserStore(application)
     private var job: Job? = null
+    private val database = DatabaseProvider.getDatabase(application)
+    private val characterDao = database.characterDao()
+    private val locationDao = database.locationDao()
 
     private val _state = MutableStateFlow(ProfileState())
     val state: StateFlow<ProfileState> = _state.asStateFlow()
@@ -31,6 +35,8 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             job?.cancel()
             job = viewModelScope.launch {
                 userStore.clearName()
+                characterDao.clearAll()
+                locationDao.clearAll()
                 _state.update { it.copy(isLoggedOut = true) }
             }
         }
