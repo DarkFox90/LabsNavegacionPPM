@@ -15,7 +15,7 @@ fun CharacterEntity.toModel(): Character {
     )
 }
 
-fun Location.toModel(): Location {
+fun LocationEntity.toModel(): Location {
     return Location(
         id = id,
         name = name,

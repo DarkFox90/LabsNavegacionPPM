@@ -1,21 +1,27 @@
 package com.example.lab07.characters
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.lab07.data.CharacterDb
+import com.example.lab07.data.DatabaseProvider
+import com.example.lab07.data.toModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CharactersViewModel : ViewModel() {
+class CharactersViewModel(application: Application): AndroidViewModel(application) {
     private val _state = MutableStateFlow(CharactersState())
     val state: StateFlow<CharactersState> = _state.asStateFlow()
 
     private var job: Job? = null
+    private val characterDao = DatabaseProvider.getDatabase(application).characterDao()
 
     fun onEvent(event: CharactersEvent) {
         when (event) {
@@ -30,10 +36,10 @@ class CharactersViewModel : ViewModel() {
         _state.update { it.copy(isLoading = true, hasError = false) }
 
         job = viewModelScope.launch {
-            delay(4000)
-            val db = CharacterDb()
-            val personajes = db.getAllCharacters()
-            _state.update { it.copy(isLoading = false, data = personajes) }
+            characterDao.getAllCharacters().collectLatest { entities ->
+                val personajes = entities.map { it.toModel() }
+                _state.update { it.copy(isLoading = false, data = personajes) }
+            }
         }
     }
 
