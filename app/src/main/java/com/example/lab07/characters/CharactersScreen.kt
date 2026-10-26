@@ -15,11 +15,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,7 +45,11 @@ import coil.compose.AsyncImage
 import com.example.lab07.Character
 
 @Composable
-fun CharacterItem(character: Character, onClick: () -> Unit) {
+fun CharacterItem(
+    character: Character,
+    onClick: () -> Unit,
+    onFavoriteClick: () -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -60,7 +68,7 @@ fun CharacterItem(character: Character, onClick: () -> Unit) {
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        Column() {
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "${character.name}",
                 fontWeight = FontWeight.Bold,
@@ -84,6 +92,13 @@ fun CharacterItem(character: Character, onClick: () -> Unit) {
             )
         }
 
+        IconButton(onClick = onFavoriteClick) {
+            Icon(
+                imageVector = if (character.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorito",
+                tint = if (character.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -165,21 +180,48 @@ fun CharactersScreen(
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    actions = {
+                        IconToggleButton(
+                            checked = state.showOnlyFavorites,
+                            onCheckedChange = { onEvent(CharactersEvent.ToggleFilter) }
+                        ) {
+                            Icon(
+                                imageVector = if (state.showOnlyFavorites) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Filtrar favoritos",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
+                    }
                 )
             }
         ) { innerPadding ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                items(state.data) { character ->
-                    CharacterItem(
-                        character = character,
-                        onClick = { onNavigateToDetails(character.id) }
+            if (state.data.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "No hay elementos para mostrar",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    items(state.data) { character ->
+                        CharacterItem(
+                            character = character,
+                            onClick = { onNavigateToDetails(character.id) },
+                            onFavoriteClick = { onEvent(CharactersEvent.ToggleFavorite(character.id, character.isFavorite)) }
+                        )
+                    }
                 }
             }
         }

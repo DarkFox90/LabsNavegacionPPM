@@ -27,16 +27,27 @@ class CharactersViewModel(application: Application): AndroidViewModel(applicatio
         when (event) {
             is CharactersEvent.CargarDatos -> cargarDatos()
             is CharactersEvent.ForzarError -> forzarError()
+            is CharactersEvent.ToggleFilter -> {
+                _state.update { it.copy(showOnlyFavorites = !it.showOnlyFavorites) }
+                cargarDatos()
+            }
+            is CharactersEvent.ToggleFavorite -> {
+                viewModelScope.launch {
+                    characterDao.updateFavoriteStatus(event.characterId, !event.currentIsFavorite)
+                }
+            }
         }
     }
 
     private fun cargarDatos() {
         job?.cancel()
-
         _state.update { it.copy(isLoading = true, hasError = false) }
 
         job = viewModelScope.launch {
-            characterDao.getAllCharacters().collectLatest { entities ->
+            val isFiltered = _state.value.showOnlyFavorites
+            val flow = if (isFiltered) characterDao.getFavoriteCharacters() else characterDao.getAllCharacters()
+
+            flow.collectLatest { entities ->
                 val personajes = entities.map { it.toModel() }
                 _state.update { it.copy(isLoading = false, data = personajes) }
             }
