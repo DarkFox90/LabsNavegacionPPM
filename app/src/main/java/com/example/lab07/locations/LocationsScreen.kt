@@ -57,7 +57,7 @@ fun LocationItem(location: Location, onClick: () -> Unit) {
 @Composable
 fun LocationsRoute(
     onNavigateToDetails: (Int) -> Unit,
-    viewModel: LocationsViewModel = viewModel()
+    viewModel: LocationsViewModel = viewModel(factory = LocationsViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsState()
 

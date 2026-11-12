@@ -43,7 +43,7 @@ import coil.compose.AsyncImage
 @Composable
 fun CharacterDetailsRoute(
     onNavigateBack: () -> Unit,
-    viewModel: CharacterDetailsViewModel = viewModel()
+    viewModel: CharacterDetailsViewModel = viewModel(factory = CharacterDetailsViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsState()
 

@@ -39,7 +39,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun LocationDetailsRoute(
     onNavigateBack: () -> Unit,
-    viewModel: LocationDetailsViewModel = viewModel()
+    viewModel: LocationDetailsViewModel = viewModel(factory = LocationDetailsViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsState()
 

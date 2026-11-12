@@ -26,12 +26,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.lab07.R
-
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun LoginRoute(
     onNavigateToHome: () -> Unit,
-    viewModel: LoginViewModel = viewModel()
+    viewModel: LoginViewModel = viewModel(factory = LoginViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsState()
 
@@ -79,6 +79,17 @@ fun LoginScreen(
                     .padding(horizontal = 32.dp)
                     .padding(bottom = 16.dp)
             )
+
+            if (state.hasError) {
+                Text(
+                    text = "No se pudo obtener la información. Revisa tu conexión a internet.",
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(horizontal = 32.dp)
+                        .padding(bottom = 16.dp)
+                )
+            }
 
             Button(
                 onClick = { onEvent(LoginEvent.OnLoginClick) },

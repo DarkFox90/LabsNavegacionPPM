@@ -1,13 +1,14 @@
 package com.example.lab07.login
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.lab07.data.CharacterDb
-import com.example.lab07.data.DatabaseProvider
-import com.example.lab07.data.LocationDb
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.lab07.data.UserStore
-import com.example.lab07.data.toEntity
+import com.example.lab07.data.repository.CharacterRepository
+import com.example.lab07.data.repository.LocationRepository
+import com.example.lab07.data.repository.RepositoryProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,13 +16,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class LoginViewModel(application: Application) : AndroidViewModel(application) {
+class LoginViewModel(
+    private val userStore: UserStore,
+    private val characterRepository: CharacterRepository,
+    private val locationRepository: LocationRepository
+) : ViewModel() {
 
-    private val userStore = UserStore(application)
     private var job: Job? = null
-    private val database = DatabaseProvider.getDatabase(application)
-    private val characterDao = database.characterDao()
-    private val locationDao = database.locationDao()
 
     private val _state = MutableStateFlow(LoginState())
     val state: StateFlow<LoginState> = _state.asStateFlow()
@@ -41,25 +42,37 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             is LoginEvent.OnNameChanged -> {
                 _state.update { it.copy(nameInput = event.newName) }
             }
-            is LoginEvent.OnLoginClick -> {
-                job?.cancel()
-                job = viewModelScope.launch {
-                    val nameToSave = _state.value.nameInput
-                    if (nameToSave.isNotBlank()) {
-                        _state.update { it.copy(isLoading = true) }
+            is LoginEvent.OnLoginClick -> login()
+        }
+    }
 
-                        val charactersToSync = CharacterDb().getAllCharacters().map { it.toEntity() }
-                        val locationsToSync = LocationDb().getAllLocations().map { it.toEntity() }
+    private fun login() {
+        val nameToSave = _state.value.nameInput
+        if (nameToSave.isBlank()) return
 
-                        characterDao.insertAll(charactersToSync)
-                        locationDao.insertAll(locationsToSync)
+        job?.cancel()
+        job = viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, hasError = false) }
+            try {
+                characterRepository.syncCharacters()
+                locationRepository.syncLocations()
+                userStore.saveName(nameToSave)
+                _state.update { it.copy(isLoading = false, isLoginSuccessful = true) }
+            } catch (e: Exception) {
+                _state.update { it.copy(isLoading = false, hasError = true) }
+            }
+        }
+    }
 
-                        kotlinx.coroutines.delay(4000)
-
-                        userStore.saveName(nameToSave)
-                        _state.update { it.copy(isLoading = false, isLoginSuccessful = true) }
-                    }
-                }
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
+                LoginViewModel(
+                    RepositoryProvider.userStore(application),
+                    RepositoryProvider.characterRepository(application),
+                    RepositoryProvider.locationRepository(application)
+                )
             }
         }
     }

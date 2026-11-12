@@ -15,7 +15,7 @@ interface LocationDao {
     fun getAllLocations(): Flow<List<LocationEntity>>
 
     @Query("SELECT * FROM locations WHERE id = :id LIMIT 1")
-    fun getLocationById(id: Int): Flow<LocationEntity>
+    fun getLocationById(id: Int): Flow<LocationEntity?>
 
     @Query("DELETE FROM locations")
     suspend fun clearAll()

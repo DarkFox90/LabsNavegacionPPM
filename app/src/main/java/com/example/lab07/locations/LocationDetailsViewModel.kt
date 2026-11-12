@@ -1,17 +1,17 @@
 package com.example.lab07.locations
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.toRoute
-import com.example.lab07.data.DatabaseProvider
-import com.example.lab07.data.LocationDb
-import com.example.lab07.data.toModel
+import com.example.lab07.data.repository.LocationRepository
+import com.example.lab07.data.repository.RepositoryProvider
 import com.example.lab07.navigation.LocationDetailsDestination
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,15 +20,14 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LocationDetailsViewModel(
-    application: Application,
-    private val savedStateHandle: SavedStateHandle
-) : AndroidViewModel(application) {
+    private val savedStateHandle: SavedStateHandle,
+    private val repository: LocationRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(LocationDetailsState())
     val state: StateFlow<LocationDetailsState> = _state.asStateFlow()
 
     private var job: Job? = null
-    private val locationDao = DatabaseProvider.getDatabase(application).locationDao()
 
     fun onEvent(event: LocationDetailsEvent) {
         when (event) {
@@ -45,9 +44,9 @@ class LocationDetailsViewModel(
             val destination = savedStateHandle.toRoute<LocationDetailsDestination>()
             val idUbicacion = destination.locationId
 
-            locationDao.getLocationById(idUbicacion).collectLatest { entity ->
-                if (entity != null) {
-                    _state.update { it.copy(isLoading = false, data = entity.toModel()) }
+            repository.getLocationById(idUbicacion).collectLatest { ubicacion ->
+                if (ubicacion != null) {
+                    _state.update { it.copy(isLoading = false, data = ubicacion) }
                 } else {
                     _state.update { it.copy(isLoading = false, hasError = true) }
                 }
@@ -58,5 +57,17 @@ class LocationDetailsViewModel(
     private fun forzarError() {
         job?.cancel()
         _state.update { it.copy(isLoading = false, hasError = true) }
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
+                LocationDetailsViewModel(
+                    createSavedStateHandle(),
+                    RepositoryProvider.locationRepository(application)
+                )
+            }
+        }
     }
 }

@@ -1,14 +1,13 @@
 package com.example.lab07.characters
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.lab07.data.CharacterDb
-import com.example.lab07.data.DatabaseProvider
-import com.example.lab07.data.toModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.example.lab07.data.repository.CharacterRepository
+import com.example.lab07.data.repository.RepositoryProvider
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,12 +15,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class CharactersViewModel(application: Application): AndroidViewModel(application) {
+class CharactersViewModel(
+    private val repository: CharacterRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(CharactersState())
     val state: StateFlow<CharactersState> = _state.asStateFlow()
 
     private var job: Job? = null
-    private val characterDao = DatabaseProvider.getDatabase(application).characterDao()
 
     fun onEvent(event: CharactersEvent) {
         when (event) {
@@ -33,7 +33,7 @@ class CharactersViewModel(application: Application): AndroidViewModel(applicatio
             }
             is CharactersEvent.ToggleFavorite -> {
                 viewModelScope.launch {
-                    characterDao.updateFavoriteStatus(event.characterId, !event.currentIsFavorite)
+                    repository.updateFavorite(event.characterId, !event.currentIsFavorite)
                 }
             }
         }
@@ -45,10 +45,9 @@ class CharactersViewModel(application: Application): AndroidViewModel(applicatio
 
         job = viewModelScope.launch {
             val isFiltered = _state.value.showOnlyFavorites
-            val flow = if (isFiltered) characterDao.getFavoriteCharacters() else characterDao.getAllCharacters()
+            val flow = if (isFiltered) repository.getFavoriteCharacters() else repository.getCharacters()
 
-            flow.collectLatest { entities ->
-                val personajes = entities.map { it.toModel() }
+            flow.collectLatest { personajes ->
                 _state.update { it.copy(isLoading = false, data = personajes) }
             }
         }
@@ -57,5 +56,14 @@ class CharactersViewModel(application: Application): AndroidViewModel(applicatio
     private fun forzarError() {
         job?.cancel()
         _state.update { it.copy(isLoading = false, hasError = true) }
+    }
+
+    companion object {
+        val Factory = viewModelFactory {
+            initializer {
+                val application = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]!!
+                CharactersViewModel(RepositoryProvider.characterRepository(application))
+            }
+        }
     }
 }

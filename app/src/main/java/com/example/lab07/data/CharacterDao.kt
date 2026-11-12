@@ -15,7 +15,7 @@ interface CharacterDao {
     fun getAllCharacters(): Flow<List<CharacterEntity>>
 
     @Query("SELECT * FROM characters WHERE id = :id LIMIT 1")
-    fun getCharacterById(id: Int): Flow<CharacterEntity>
+    fun getCharacterById(id: Int): Flow<CharacterEntity?>
 
     @Query("SELECT * FROM characters WHERE isFavorite = 1")
     fun getFavoriteCharacters(): Flow<List<CharacterEntity>>

@@ -105,7 +105,7 @@ fun CharacterItem(
 @Composable
 fun CharactersRoute(
     onNavigateToDetails: (Int) -> Unit,
-    viewModel: CharactersViewModel = viewModel()
+    viewModel: CharactersViewModel = viewModel(factory = CharactersViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsState()
 
