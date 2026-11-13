@@ -27,6 +27,15 @@ class LocationsViewModel(
         when (event) {
             is LocationsEvent.CargarDatos -> cargarDatos()
             is LocationsEvent.ForzarError -> forzarError()
+            is LocationsEvent.ChangeFilter -> {
+                _state.update { it.copy(filter = event.filter) }
+                cargarDatos()
+            }
+            is LocationsEvent.ToggleFavorite -> {
+                viewModelScope.launch {
+                    repository.updateFavorite(event.locationId, !event.currentIsFavorite)
+                }
+            }
         }
     }
 
@@ -35,7 +44,13 @@ class LocationsViewModel(
         _state.update { it.copy(isLoading = true, hasError = false) }
 
         job = viewModelScope.launch {
-            repository.getLocations().collectLatest { ubicaciones ->
+            val flow = when (_state.value.filter) {
+                LocationFilter.TODAS -> repository.getLocations()
+                LocationFilter.FAVORITAS -> repository.getFavoriteLocations()
+                LocationFilter.NO_FAVORITAS -> repository.getNotFavoriteLocations()
+            }
+
+            flow.collectLatest { ubicaciones ->
                 _state.update { it.copy(isLoading = false, data = ubicaciones) }
             }
         }

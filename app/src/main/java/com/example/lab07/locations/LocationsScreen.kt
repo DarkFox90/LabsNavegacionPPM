@@ -33,23 +33,73 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 
 @Composable
-fun LocationItem(location: Location, onClick: () -> Unit) {
-    Column(
+fun LocationItem(
+    location: Location,
+    onClick: () -> Unit,
+    onFavoriteClick: () -> Unit
+) {
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = location.name,
-            style = MaterialTheme.typography.bodyLarge
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = location.name,
+                style = MaterialTheme.typography.bodyLarge
+            )
 
-        Text(
-            text = location.type,
-            style = MaterialTheme.typography.bodyMedium
+            Text(
+                text = location.type,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        IconButton(onClick = onFavoriteClick) {
+            Icon(
+                imageVector = if (location.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorito",
+                tint = if (location.isFavorite) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+fun LocationFilterRow(
+    selected: LocationFilter,
+    onFilterSelected: (LocationFilter) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterChip(
+            selected = selected == LocationFilter.TODAS,
+            onClick = { onFilterSelected(LocationFilter.TODAS) },
+            label = { Text("Todas") }
+        )
+        FilterChip(
+            selected = selected == LocationFilter.FAVORITAS,
+            onClick = { onFilterSelected(LocationFilter.FAVORITAS) },
+            label = { Text("Favoritas") }
+        )
+        FilterChip(
+            selected = selected == LocationFilter.NO_FAVORITAS,
+            onClick = { onFilterSelected(LocationFilter.NO_FAVORITAS) },
+            label = { Text("No favoritas") }
         )
     }
 }
@@ -141,16 +191,37 @@ fun LocationsScreen(
                 )
             }
         ) { innerPadding ->
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                items(state.data) { location ->
-                    LocationItem(
-                        location = location,
-                        onClick = { onNavigateToDetails(location.id)}
-                    )
+                LocationFilterRow(
+                    selected = state.filter,
+                    onFilterSelected = { onEvent(LocationsEvent.ChangeFilter(it)) }
+                )
+
+                if (state.data.isEmpty()) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No hay elementos para mostrar",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                } else {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        items(state.data) { location ->
+                            LocationItem(
+                                location = location,
+                                onClick = { onNavigateToDetails(location.id) },
+                                onFavoriteClick = { onEvent(LocationsEvent.ToggleFavorite(location.id, location.isFavorite)) }
+                            )
+                        }
+                    }
                 }
             }
         }

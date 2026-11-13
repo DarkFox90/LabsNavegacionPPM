@@ -26,6 +26,18 @@ class LocationRepositoryImpl(
         return dao.getLocationById(id).map { it?.toModel() }
     }
 
+    override fun getFavoriteLocations(): Flow<List<Location>> {
+        return dao.getFavoriteLocations().map { entities -> entities.map { it.toModel() } }
+    }
+
+    override fun getNotFavoriteLocations(): Flow<List<Location>> {
+        return dao.getNotFavoriteLocations().map { entities -> entities.map { it.toModel() } }
+    }
+
+    override suspend fun updateFavorite(id: Int, isFavorite: Boolean) {
+        dao.updateFavoriteStatus(id, isFavorite)
+    }
+
     override suspend fun clearLocations() {
         dao.clearAll()
     }

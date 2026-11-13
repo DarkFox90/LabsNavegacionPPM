@@ -33,6 +33,7 @@ class LocationDetailsViewModel(
         when (event) {
             is LocationDetailsEvent.CargarDatos -> cargarDatos()
             is LocationDetailsEvent.ForzarError -> forzarError()
+            is LocationDetailsEvent.ToggleFavorite -> toggleFavorite()
         }
     }
 
@@ -57,6 +58,13 @@ class LocationDetailsViewModel(
     private fun forzarError() {
         job?.cancel()
         _state.update { it.copy(isLoading = false, hasError = true) }
+    }
+
+    private fun toggleFavorite() {
+        val location = _state.value.data ?: return
+        viewModelScope.launch {
+            repository.updateFavorite(location.id, !location.isFavorite)
+        }
     }
 
     companion object {
