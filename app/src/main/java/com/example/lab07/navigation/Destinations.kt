@@ -13,6 +13,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable data class CharacterDetailsDestination(val characterId: Int)
 
+@Serializable data class CharacterFormDestination(val characterId: Int? = null)
+
 // Locations
 @Serializable data object LocationsGraph
 

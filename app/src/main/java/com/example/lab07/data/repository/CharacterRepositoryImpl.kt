@@ -35,6 +35,18 @@ class CharacterRepositoryImpl(
         dao.updateFavoriteStatus(id, isFavorite)
     }
 
+    override suspend fun createCharacter(character: Character) {
+        dao.insert(character.copy(id = 0).toEntity())
+    }
+
+    override suspend fun updateCharacter(character: Character) {
+        dao.update(character.toEntity())
+    }
+
+    override suspend fun deleteCharacter(id: Int) {
+        dao.deleteById(id)
+    }
+
     override suspend fun clearCharacters() {
         dao.clearAll()
     }

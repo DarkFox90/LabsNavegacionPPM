@@ -39,10 +39,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 
 @Composable
 fun CharacterDetailsRoute(
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Int) -> Unit,
     viewModel: CharacterDetailsViewModel = viewModel(factory = CharacterDetailsViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsState()
@@ -51,10 +55,17 @@ fun CharacterDetailsRoute(
         viewModel.onEvent(CharacterDetailsEvent.CargarDatos)
     }
 
+    LaunchedEffect(state.isDeleted) {
+        if (state.isDeleted) {
+            onNavigateBack()
+        }
+    }
+
     CharacterDetailsScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onNavigateToEdit = onNavigateToEdit
     )
 }
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,7 +73,8 @@ fun CharacterDetailsRoute(
 fun CharacterDetailsScreen(
     state: CharacterDetailsState,
     onEvent: (CharacterDetailsEvent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Int) -> Unit
 ) {
     if (state.isLoading) {
         Box(
@@ -126,10 +138,29 @@ fun CharacterDetailsScreen(
                             )
                         }
                     },
+
+                    actions = {
+                        state.data?.let { character ->
+                            IconButton(onClick = { onNavigateToEdit(character.id) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Editar"
+                                )
+                            }
+                            IconButton(onClick = { onEvent(CharacterDetailsEvent.Eliminar) }) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Eliminar"
+                                )
+                            }
+                        }
+                    },
+
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 )
             }
@@ -151,6 +182,7 @@ fun CharacterDetailsScreen(
                         modifier = Modifier
                             .size(160.dp)
                             .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer)
                     )
 
                     Spacer(modifier = Modifier.height(48.dp))

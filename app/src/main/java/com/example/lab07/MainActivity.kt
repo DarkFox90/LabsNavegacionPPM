@@ -35,6 +35,8 @@ import com.example.lab07.locations.LocationDetailsRoute
 import com.example.lab07.locations.LocationsRoute
 import com.example.lab07.login.LoginRoute
 import com.example.lab07.profile.ProfileRoute
+import com.example.lab07.navigation.CharacterFormDestination
+import com.example.lab07.characters.CharacterFormRoute
 
 
 class MainActivity : ComponentActivity() {
@@ -97,12 +99,23 @@ fun AppNavigation() {
                     CharactersRoute(
                         onNavigateToDetails = { id ->
                             navController.navigate(CharacterDetailsDestination(id))
+                        },
+                        onNavigateToCreate = {
+                            navController.navigate(CharacterFormDestination())
                         }
                     )
                 }
                 composable<CharacterDetailsDestination> { backStackEntry ->
                     CharacterDetailsRoute(
-                        onNavigateBack = {navController.popBackStack()}
+                        onNavigateBack = {navController.popBackStack()},
+                        onNavigateToEdit = { id ->
+                            navController.navigate(CharacterFormDestination(id))
+                        }
+                    )
+                }
+                composable<CharacterFormDestination> {
+                    CharacterFormRoute(
+                        onNavigateBack = { navController.popBackStack() }
                     )
                 }
             }

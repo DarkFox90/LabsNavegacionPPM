@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import androidx.room.Update
 
 @Dao
 interface CharacterDao {
@@ -22,6 +23,15 @@ interface CharacterDao {
 
     @Query("UPDATE characters SET isFavorite = :isFavorite WHERE id = :id")
     suspend fun updateFavoriteStatus(id: Int, isFavorite: Boolean)
+
+    @Insert
+    suspend fun insert(character: CharacterEntity)
+
+    @Update
+    suspend fun update(character: CharacterEntity)
+
+    @Query("DELETE FROM characters WHERE id = :id")
+    suspend fun deleteById(id: Int)
 
     @Query("DELETE FROM characters")
     suspend fun clearAll()

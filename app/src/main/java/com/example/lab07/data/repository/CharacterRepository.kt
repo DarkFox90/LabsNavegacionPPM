@@ -9,5 +9,11 @@ interface CharacterRepository {
     fun getFavoriteCharacters(): Flow<List<Character>>
     fun getCharacterById(id: Int): Flow<Character?>
     suspend fun updateFavorite(id: Int, isFavorite: Boolean)
+
+    suspend fun createCharacter(character: Character)
+
+    suspend fun updateCharacter(character: Character)
+
+    suspend fun deleteCharacter(id: Int)
     suspend fun clearCharacters()
 }

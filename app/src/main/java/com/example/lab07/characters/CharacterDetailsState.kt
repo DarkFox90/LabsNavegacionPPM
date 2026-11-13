@@ -5,5 +5,6 @@ import com.example.lab07.Character
 data class CharacterDetailsState(
     val isLoading: Boolean = true,
     val data: Character? = null,
-    val hasError: Boolean = false
+    val hasError: Boolean = false,
+    val isDeleted: Boolean = false
 )

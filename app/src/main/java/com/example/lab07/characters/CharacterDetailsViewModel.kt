@@ -32,6 +32,7 @@ class CharacterDetailsViewModel(
         when (event) {
             is CharacterDetailsEvent.CargarDatos -> cargarDatos()
             is CharacterDetailsEvent.ForzarError -> forzarError()
+            is CharacterDetailsEvent.Eliminar -> eliminar()
         }
     }
 
@@ -56,6 +57,15 @@ class CharacterDetailsViewModel(
     private fun forzarError() {
         job?.cancel()
         _state.update { it.copy(isLoading = false, hasError = true) }
+    }
+
+    private fun eliminar() {
+        val id = _state.value.data?.id ?: return
+        job?.cancel()
+        viewModelScope.launch {
+            repository.deleteCharacter(id)
+            _state.update { it.copy(isDeleted = true) }
+        }
     }
 
     companion object {

@@ -43,7 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.example.lab07.Character
-
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
 @Composable
 fun CharacterItem(
     character: Character,
@@ -64,6 +66,7 @@ fun CharacterItem(
             modifier = Modifier
                 .size(80.dp)
                 .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer)
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -105,6 +108,7 @@ fun CharacterItem(
 @Composable
 fun CharactersRoute(
     onNavigateToDetails: (Int) -> Unit,
+    onNavigateToCreate: () -> Unit,
     viewModel: CharactersViewModel = viewModel(factory = CharactersViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsState()
@@ -116,7 +120,8 @@ fun CharactersRoute(
     CharactersScreen(
         state = state,
         onEvent = viewModel::onEvent,
-        onNavigateToDetails = onNavigateToDetails
+        onNavigateToDetails = onNavigateToDetails,
+        onNavigateToCreate = onNavigateToCreate
     )
 }
 
@@ -125,7 +130,8 @@ fun CharactersRoute(
 fun CharactersScreen(
     state: CharactersState,
     onEvent: (CharactersEvent) -> Unit,
-    onNavigateToDetails: (Int) -> Unit
+    onNavigateToDetails: (Int) -> Unit,
+    onNavigateToCreate: () -> Unit
 ) {
     if (state.isLoading) {
         Box(
@@ -170,6 +176,14 @@ fun CharactersScreen(
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
+            floatingActionButton = {
+                FloatingActionButton(onClick = onNavigateToCreate) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Agregar personaje"
+                    )
+                }
+            },
             topBar = {
                 TopAppBar(
                     title = {
