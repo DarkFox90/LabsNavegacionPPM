@@ -31,7 +31,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Composable
 fun ProfileRoute(
     onNavigateToLogin: () -> Unit,
-    viewModel: ProfileViewModel = viewModel()
+    viewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
 ) {
     val state by viewModel.state.collectAsState()
 
